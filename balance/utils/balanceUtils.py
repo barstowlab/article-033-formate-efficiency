@@ -229,7 +229,7 @@ def SolveFluxBalanceEquation(sMatrix, reactions, reactants, ioStatus):
 	rss = w_rss1(fVector0, sMatrix, ioStatus)
 
 	result = fmin_slsqp(w_rss1, fVector0, args=(sMatrix, ioStatus), iprint=0, \
-	ieqcons=[ieqconstraint])
+    ieqcons=[ieqconstraint], acc=1e-14, iter=2000)
 
 	fVectorOpt = result / 1.0
 

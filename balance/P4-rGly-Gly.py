@@ -11,96 +11,74 @@ Get_IO_Status_for_Compound_List, ExportUniqueCompoundsWithIOStatus, GenerateIOSt
 from utils.vectorOutput4 import generateOutputMatrixWithHeaders, writeOutputMatrix, Write_SMatrix
 from utils.specutils12 import ensure_dir
 
-# P2O7 = Diphosphate
-# TrxOx = Thioredoxin disulfide
-# PO43- = Phosphate
-
-# In this version, I've added back the formate dehydrogenase reaction. 
+# Reductive glycine pathway, glycine reductase variant (Dataset S1 sheet D, reactions 1-11).
+# Compound names match Dataset S1 exactly. The reaction arrow is written '->'
+# and stoichiometric coefficients '2*X' because that is what ParseReactionList
+# expects; the published tables use '→' and '2×X' for the same reactions.
+# Reactions after the pathway are the acetyl-CoA to butanol module
+# (Dataset S1 sheet G, reactions 1-6).
 
 reactionList = \
 [\
-'THF + HCO2- + ATP -> ADP + PO43- + 10-Formyl-THF', \
-\
-'10-Formyl-THF + Hplus -> 5-10-Methenyl-THF + H2O', \
-\
-'5-10-Methenyl-THF + NADPH -> 5-10-Methylene-THF + NADPplus', \
-\
-'5-10-Methylene-THF + NH3 + CO2 + NADH + Hplus -> Glycine + THF + NADplus', \
-\
-'Glycine + PO43- + TrxRed -> Acetyl-phosphate + NH3 + TrxOx + H2O', \
-\
+'THF + HCO₂⁻ + ATP -> ADP + HPO₄²⁻ + 10-Formyl-THF', \
+'10-Formyl-THF + H⁺ -> 5,10-Methenyl-THF + H₂O', \
+'5,10-Methenyl-THF + NADPH -> 5,10-Methylene-THF + NADP⁺', \
+'5,10-Methylene-THF + NH₄⁺ + CO₂ + NADH -> Glycine + THF + NAD⁺', \
+'Glycine + HPO₄²⁻ + Thioredoxin + H⁺ -> Acetyl-phosphate + Thioredoxin disulfide + NH₄⁺ + H₂O', \
 'ADP + Acetyl-phosphate -> ATP + Acetate', \
-\
-'ATP + Acetate + CoA -> AMP + P2O7 + Acetyl-CoA', \
-\
-'2*Acetyl-CoA -> CoA + Acetoacetyl-CoA', \
-\
-'Acetoacetyl-CoA + NADPH + Hplus -> Hydroxybutanoyl-CoA + NADPplus', \
-\
-'Hydroxybutanoyl-CoA -> Crotonoyl-CoA + H2O', \
-\
-'Crotonoyl-CoA + NADH + Hplus -> Butanoyl-CoA + NADplus', \
-\
-'Butanoyl-CoA + NADH + Hplus -> Butanal + CoA + NADplus', \
-\
-'Butanal + NADH + Hplus -> 1-Butanol + NADplus', \
-\
+'ATP + Acetate + CoA -> AMP + HP₂O₇³⁻ + Acetyl-CoA', \
 'ATP + AMP -> 2*ADP', \
-\
-'HCO2- + NADplus -> CO2 + NADH + Hplus', \
-\
-'NADH + NADPplus -> NADPH + NADplus', \
-\
-'TrxOx + NADPH -> TrxRed + NADPplus + Hplus' \
+'HCO₂⁻ + NAD⁺ -> CO₂ + NADH', \
+'NADH + NADP⁺ -> NADPH + NAD⁺', \
+'Thioredoxin disulfide + NADPH + H⁺ -> Thioredoxin + NADP⁺', \
+'2*Acetyl-CoA -> CoA + Acetoacetyl-CoA', \
+'Acetoacetyl-CoA + NADH + H⁺ -> (S)-3-Hydroxybutanoyl-CoA + NAD⁺', \
+'(S)-3-Hydroxybutanoyl-CoA -> Crotonoyl-CoA + H₂O', \
+'Crotonoyl-CoA + NADPH + H⁺ -> Butanoyl-CoA + NADP⁺', \
+'Butanoyl-CoA + NADH + H⁺ -> Butanal + CoA + NAD⁺', \
+'Butanal + NADH + H⁺ -> 1-Butanol + NAD⁺' \
 ]
 
-
-
-
-
-
-reactantsToGet = ['ATP', 'NADH', 'Fdred', 'Sulfate', 'N2', 'CO2', 'HCO3-', 'HCO2-', 'CO','Fd1red'] 
+reactantsToGet = ['ATP', 'NADH', 'Fdred', 'Sulfate', 'N2', 'CO₂', 'HCO₃⁻', 'HCO₂⁻', \
+'CO', 'Fd1red']
 
 uniqueCompounds, reactions, sMatrixTKeyIndexed = ParseReactionList(reactionList, reactionArrow='->')
 
 uniqueCompoundsIOStatusProposed = GenerateIOStatusList(uniqueCompounds)
 
- 
+# Changing IO status to EXACTLY match other code
 uniqueCompoundsIOStatusEdit = \
-[['1-Butanol', 'Target'],
-['10-Formyl-THF', 'Intermediate'],
-['5-10-Methenyl-THF', 'Intermediate'],
-['5-10-Methylene-THF', 'Intermediate'],
-['ADP', 'Output'],
-['AMP', 'Intermediate'],
-['ATP', 'Input'],
-['Acetate', 'Intermediate'],
-['Acetoacetyl-CoA', 'Intermediate'],
-['Acetyl-CoA', 'Intermediate'],
-['Acetyl-phosphate', 'Intermediate'],
-['Butanal', 'Intermediate'],
-['Butanoyl-CoA', 'Intermediate'],
-['CO2', 'Intermediate'],
-['CoA', 'Output'],
-['Crotonoyl-CoA', 'Intermediate'],
-['Glycine', 'Intermediate'],
-['H2O', 'Input/Output'],
-['HCO2-', 'Input/Output'],
-['Hplus', 'Input/Output'],
-['Hydroxybutanoyl-CoA', 'Intermediate'],
-['NADH', 'Input'],
-['NADPH', 'Intermediate'],
-['NADPplus', 'Intermediate'],
-['NADplus', 'Input/Output'],
-['NH3', 'Intermediate'],
-['P2O7', 'Output'],
-['PO43-', 'Output'],
-['THF', 'Output'],
-['TrxOx', 'Intermediate'],
-['TrxRed', 'Intermediate']
-]
-
- 
+[['(S)-3-Hydroxybutanoyl-CoA', 'Intermediate'],
+ ['1-Butanol', 'Target'],
+ ['10-Formyl-THF', 'Intermediate'],
+ ['5,10-Methenyl-THF', 'Intermediate'],
+ ['5,10-Methylene-THF', 'Intermediate'],
+ ['ADP', 'Input/Output'],
+ ['AMP', 'Intermediate'],
+ ['ATP', 'Input/Output'],
+ ['Acetate', 'Intermediate'],
+ ['Acetoacetyl-CoA', 'Intermediate'],
+ ['Acetyl-CoA', 'Intermediate'],
+ ['Acetyl-phosphate', 'Intermediate'],
+ ['Butanal', 'Intermediate'],
+ ['Butanoyl-CoA', 'Intermediate'],
+ ['CO₂', 'Intermediate'],
+ ['CoA', 'Intermediate'],
+ ['Crotonoyl-CoA', 'Intermediate'],
+ ['Glycine', 'Intermediate'],
+ ['HCO₂⁻', 'Input/Output'],
+ ['HPO₄²⁻', 'Input/Output'],
+ ['HP₂O₇³⁻', 'Input/Output'],
+ ['H⁺', 'Input/Output'],
+ ['H₂O', 'Input/Output'],
+ ['NADH', 'Input/Output'],
+ ['NADPH', 'Intermediate'],
+ ['NADP⁺', 'Intermediate'],
+ ['NAD⁺', 'Input/Output'],
+ ['NH₄⁺', 'Intermediate'],
+ ['THF', 'Intermediate'],
+ ['Thioredoxin', 'Intermediate'],
+ ['Thioredoxin disulfide', 'Intermediate']]
 
 
 i = 0
@@ -108,7 +86,7 @@ ioStatusEdit = []
 while i < len(uniqueCompoundsIOStatusEdit):
     ioStatusEdit.append(uniqueCompoundsIOStatusEdit[i][1])
     i += 1
-    
+
 sMatrixT = ConvertIndexedSMatrix(sMatrixTKeyIndexed, uniqueCompounds)
 sMatrix = sMatrixT.transpose()
 

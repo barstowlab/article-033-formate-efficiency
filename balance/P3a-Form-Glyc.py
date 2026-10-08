@@ -11,52 +11,39 @@ Get_IO_Status_for_Compound_List, ExportUniqueCompoundsWithIOStatus, GenerateIOSt
 from utils.vectorOutput4 import generateOutputMatrixWithHeaders, writeOutputMatrix, Write_SMatrix
 from utils.specutils12 import ensure_dir
 
+# Formolase pathway, glyceraldehyde variant, version a (Dataset S1 sheet B, reactions 2-15).
+# Compound names match Dataset S1 exactly. The reaction arrow is written '->'
+# and stoichiometric coefficients '2*X' because that is what ParseReactionList
+# expects; the published tables use '→' and '2×X' for the same reactions.
+# Reactions after the pathway are the acetyl-CoA to butanol module
+# (Dataset S1 sheet G, reactions 1-6).
 
 reactionList = \
 [\
-'CoA + HCO2- + ATP -> Formyl-CoA + H2O + AMP + P2O7', \
-\
-'Formyl-CoA + NADH + Hplus -> Formaldehyde + NADplus + CoA', \
-\
+'CoA + HCO₂⁻ + ATP -> Formyl-CoA + AMP + HP₂O₇³⁻', \
+'Formyl-CoA + NADH + H⁺ -> Formaldehyde + NAD⁺ + CoA', \
 '2*Formaldehyde -> Glycolaldehyde', \
-\
-'Glycolaldehyde + NADplus + H2O -> Glycolate + NADH + Hplus', \
-\
-'Glycolate + O2 -> Glyoxylate + H2O2', \
-\
-'2*Glyoxylate -> Tartronate Semialdehyde + CO2', \
-\
-'Tartronate Semialdehyde + NADH + Hplus -> Glycerate + NADplus', \
-\
-'Glycerate + ATP -> Glycerate2P + ADP', \
-\
-'Glycerate2P -> PPyruvate + H2O', \
-\
-'ADP + PPyruvate -> ATP + Pyruvate', \
-\
-'2*Fd1ox + Pyruvate + CoA -> 2*Fd1red + Acetyl-CoA + CO2 + 2*Hplus', \
-#LOA edit (0819): using Fdr1 for Acetyl-CoA generation
-\
-'2*Fd1ox + NADH -> 2*Fd1red + Hplus + NADplus', \
-\
-'2*Acetyl-CoA -> CoA + Acetoacetyl-CoA', \
-\
-'Acetoacetyl-CoA + NADH + Hplus -> Hydroxybutanoyl-CoA + NADplus', \
-\
-'Hydroxybutanoyl-CoA -> Crotonoyl-CoA + H2O', \
-\
-'Crotonoyl-CoA + NADH + Hplus -> Butanoyl-CoA + NADplus', \
-\
-'Butanoyl-CoA + NADH + Hplus -> Butanal + CoA + NADplus', \
-\
-'Butanal + NADH + Hplus -> 1-Butanol + NADplus', \
-\
+'Glycolaldehyde + NAD⁺ + H₂O -> Glycolate + NADH + 2*H⁺', \
+'Glycolate + O₂ -> Glyoxylate + H₂O₂', \
+'2*Glyoxylate + H⁺ -> Tartronate semialdehyde + CO₂', \
+'Tartronate semialdehyde + NADH + H⁺ -> D-Glycerate + NAD⁺', \
+'D-Glycerate + ATP -> D-Glycerate-2P + ADP + H⁺', \
+'D-Glycerate-2P -> Phosphoenolpyruvate + H₂O', \
+'ADP + Phosphoenolpyruvate + H⁺ -> ATP + Pyruvate', \
+'Pyruvate + CoA + NAD⁺ -> Acetyl-CoA + CO₂ + NADH', \
 'ATP + AMP -> 2*ADP', \
+'2*H₂O₂ -> 2*H₂O + O₂', \
+'NADH + NADP⁺ -> NADPH + NAD⁺', \
+'2*Acetyl-CoA -> CoA + Acetoacetyl-CoA', \
+'Acetoacetyl-CoA + NADH + H⁺ -> (S)-3-Hydroxybutanoyl-CoA + NAD⁺', \
+'(S)-3-Hydroxybutanoyl-CoA -> Crotonoyl-CoA + H₂O', \
+'Crotonoyl-CoA + NADPH + H⁺ -> Butanoyl-CoA + NADP⁺', \
+'Butanoyl-CoA + NADH + H⁺ -> Butanal + CoA + NAD⁺', \
+'Butanal + NADH + H⁺ -> 1-Butanol + NAD⁺' \
 ]
 
-
-
-reactantsToGet = ['ATP', 'NADH', 'Fdred', 'Sulfate', 'N2', 'CO2', 'HCO3-', 'HCO2-', 'CO','Fd1red'] 
+reactantsToGet = ['ATP', 'NADH', 'Fdred', 'Sulfate', 'N2', 'CO₂', 'HCO₃⁻', 'HCO₂⁻', \
+'CO', 'Fd1red']
 
 uniqueCompounds, reactions, sMatrixTKeyIndexed = ParseReactionList(reactionList, reactionArrow='->')
 
@@ -64,7 +51,8 @@ uniqueCompoundsIOStatusProposed = GenerateIOStatusList(uniqueCompounds)
 
 # Changing IO status to EXACTLY match other code
 uniqueCompoundsIOStatusEdit = \
-[['1-Butanol', 'Target'],
+[['(S)-3-Hydroxybutanoyl-CoA', 'Intermediate'],
+ ['1-Butanol', 'Target'],
  ['ADP', 'Input/Output'],
  ['AMP', 'Intermediate'],
  ['ATP', 'Input/Output'],
@@ -72,31 +60,29 @@ uniqueCompoundsIOStatusEdit = \
  ['Acetyl-CoA', 'Intermediate'],
  ['Butanal', 'Intermediate'],
  ['Butanoyl-CoA', 'Intermediate'],
- ['CO2', 'Output'],
- ['CoA', 'Input/Output'],
+ ['CO₂', 'Input/Output'],
+ ['CoA', 'Intermediate'],
  ['Crotonoyl-CoA', 'Intermediate'],
- ['Fd1ox', 'Intermediate'], 
- #LOA edit (0819): using Fdr1 for Acetyl-CoA generation
- ['Fd1red', 'Intermediate'],
+ ['D-Glycerate', 'Intermediate'],
+ ['D-Glycerate-2P', 'Intermediate'],
  ['Formaldehyde', 'Intermediate'],
  ['Formyl-CoA', 'Intermediate'],
- ['Glycerate', 'Intermediate'],
- ['Glycerate2P', 'Intermediate'],
  ['Glycolaldehyde', 'Intermediate'],
  ['Glycolate', 'Intermediate'],
  ['Glyoxylate', 'Intermediate'],
- ['H2O', 'Input/Output'],
- ['H2O2', 'Input/Output'],
- ['HCO2-', 'Input/Output'],
- ['Hplus', 'Input/Output'],
- ['Hydroxybutanoyl-CoA', 'Intermediate'],
+ ['HCO₂⁻', 'Input/Output'],
+ ['HP₂O₇³⁻', 'Input/Output'],
+ ['H⁺', 'Input/Output'],
+ ['H₂O', 'Input/Output'],
+ ['H₂O₂', 'Intermediate'],
  ['NADH', 'Input/Output'],
- ['NADplus', 'Input/Output'],
- ['O2', 'Input/Output'],
- ['P2O7', 'Input/Output'],
- ['PPyruvate', 'Intermediate'],
+ ['NADPH', 'Intermediate'],
+ ['NADP⁺', 'Intermediate'],
+ ['NAD⁺', 'Input/Output'],
+ ['O₂', 'Input/Output'],
+ ['Phosphoenolpyruvate', 'Intermediate'],
  ['Pyruvate', 'Intermediate'],
- ['Tartronate Semialdehyde', 'Intermediate']]
+ ['Tartronate semialdehyde', 'Intermediate']]
 
 
 i = 0
@@ -104,7 +90,7 @@ ioStatusEdit = []
 while i < len(uniqueCompoundsIOStatusEdit):
     ioStatusEdit.append(uniqueCompoundsIOStatusEdit[i][1])
     i += 1
-    
+
 sMatrixT = ConvertIndexedSMatrix(sMatrixTKeyIndexed, uniqueCompounds)
 sMatrix = sMatrixT.transpose()
 
